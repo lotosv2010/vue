@@ -213,9 +213,11 @@ const builds = {
   }
 }
 
+// npm run dev ===> TARGET:web-full-dev
 function genConfig (name) {
-  const opts = builds[name]
+  const opts = builds[name] // builds 里面 web-full-dev ===> 对应的配置
   const config = {
+    sourceMap: true,
     input: opts.entry,
     external: opts.external,
     plugins: [

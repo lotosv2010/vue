@@ -33,6 +33,14 @@ export function handleError (err: Error, vm: any, info: string) {
   }
 }
 
+/**
+ * 错误处理
+ * @param {函数，例如构造函数} handler 
+ * @param {上下文} context 
+ * @param {参数} args 
+ * @param {vm实例} vm 
+ * @param {信息} info 
+ */
 export function invokeWithErrorHandling (
   handler: Function,
   context: any,
@@ -42,7 +50,7 @@ export function invokeWithErrorHandling (
 ) {
   let res
   try {
-    res = args ? handler.apply(context, args) : handler.call(context)
+    res = args ? handler.apply(context, args) : handler.call(context) // 执行函数
     if (res && !res._isVue && isPromise(res) && !res._handled) {
       res.catch(e => handleError(e, vm, info + ` (Promise/async)`))
       // issue #9511

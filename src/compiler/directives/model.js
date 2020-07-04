@@ -33,10 +33,16 @@ export function genComponentModel (
 /**
  * Cross-platform codegen helper for generating v-model value assignment code.
  */
+/**
+ * 获取一个代码字符串，例如 v-bind:prop1.sync='prop1'，此时value为prop1
+ * @param {value值，例如：prop1} value 
+ * @param {给定字符，例如：$event} assignment 
+ */
 export function genAssignmentCode (
   value: string,
   assignment: string
 ): string {
+  // 解析v-modelde
   const res = parseModel(value)
   if (res.key === null) {
     return `${value}=${assignment}`

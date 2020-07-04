@@ -4,13 +4,23 @@ const zlib = require('zlib')
 const rollup = require('rollup')
 const terser = require('terser')
 
+// 判断是否存在dist目录，不存在就新建dist目录
 if (!fs.existsSync('dist')) {
   fs.mkdirSync('dist')
 }
 
+// 获取构建需要的配置
 let builds = require('./config').getAllBuilds()
 
+// 构建命令传入的参数过滤配置，根据过滤后的配置构建不同版本的vue文件
 // filter builds via command line arg
+
+// process.argv的值为:
+// [
+//   '/usr/local/bin/node',
+//   '/Users/Robin/Downloads/00 github/vue/scripts/build.js'
+// ]
+// 所以 process.argv[2] === undefined，执行else逻辑
 if (process.argv[2]) {
   const filters = process.argv[2].split(',')
   builds = builds.filter(b => {

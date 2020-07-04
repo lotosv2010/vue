@@ -1,11 +1,18 @@
 /* @flow */
-
+/* 
+* 通过new实例化的VNode可以分为：
+*  EmptyVNode（注释节点）
+*  TextVNode（文本节点）
+*  ElementVNode（元素节点）
+*  ComponentVNode（组件节点）
+*  CloneVNode（克隆节点）
+*/
 export default class VNode {
-  tag: string | void;
-  data: VNodeData | void;
-  children: ?Array<VNode>;
+  tag: string | void; // 元素标签
+  data: VNodeData | void; // 属性
+  children: ?Array<VNode>; // 子元素列表
   text: string | void;
-  elm: Node | void;
+  elm: Node | void; //  对应的真实 DOM 元素
   ns: string | void;
   context: Component | void; // rendered in this component's scope
   key: string | number | void;
@@ -15,7 +22,7 @@ export default class VNode {
 
   // strictly internal
   raw: boolean; // contains raw HTML? (server only)
-  isStatic: boolean; // hoisted static node
+  isStatic: boolean; // hoisted static node // 是否被标记为静态节点
   isRootInsert: boolean; // necessary for enter transition check
   isComment: boolean; // empty comment placeholder?
   isCloned: boolean; // is a cloned node?

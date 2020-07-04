@@ -21,14 +21,17 @@ import {
 export function initGlobalAPI (Vue: GlobalAPI) {
   // config
   const configDef = {}
-  configDef.get = () => config
+  configDef.get = () => config // Vue.config 获取 config 全局变量
   if (process.env.NODE_ENV !== 'production') {
-    configDef.set = () => {
+    configDef.set = () => { // 设置Vue.config时直接报错，即不允许设置Vue.config值
       warn(
         'Do not replace the Vue.config object, set individual fields instead.'
       )
     }
   }
+  // 通过ES5的defineProperty设置Vue的config的访问器属性
+  // 获取Vue.config时会执行configDef.get函数
+  // 设置Vue.config时会执行configDef.set函数
   Object.defineProperty(Vue, 'config', configDef)
 
   // exposed util methods.

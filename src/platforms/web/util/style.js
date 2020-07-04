@@ -2,13 +2,22 @@
 
 import { cached, extend, toObject } from 'shared/util'
 
+/**
+ * 字符串解析为对象形式
+ * 例如：<div style="color: red; background: green;"></div>
+ */
 export const parseStyleText = cached(function (cssText) {
   const res = {}
+  // 样式字符串中分号(;)用来作为每一条样式规则的分割
   const listDelimiter = /;(?![^(]*\))/g
+  // 冒号(:)则用来一条样式规则中属性名与值的分割
   const propertyDelimiter = /:(.+)/
+  // 分割字符串，例如：[ 'color: red', 'background: green']
   cssText.split(listDelimiter).forEach(function (item) {
     if (item) {
+      // 分割字符串，例如：[ 'color', 'red']
       const tmp = item.split(propertyDelimiter)
+      // 给res添加属性，例如：res['color'] = 'red'
       tmp.length > 1 && (res[tmp[0].trim()] = tmp[1].trim())
     }
   })

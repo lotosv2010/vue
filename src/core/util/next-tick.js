@@ -84,24 +84,31 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   }
 }
 
+/**
+ * nextTick API
+ * @param {回调函数} cb 
+ * @param {执行上下文} ctx 
+ */
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
+  // 添加一个回调函数到队列里面
   callbacks.push(() => {
-    if (cb) {
+    if (cb) { // 如果回调函数存在则使用call执行回调函数
       try {
         cb.call(ctx)
-      } catch (e) {
+      } catch (e) { //  如果不是函数则报错
         handleError(e, ctx, 'nextTick')
       }
-    } else if (_resolve) {
+    } else if (_resolve) { // _resolve存在则执行_resolve函数
       _resolve(ctx)
     }
   })
-  if (!pending) {
+  if (!pending) { // pending为false时
     pending = true
     timerFunc()
   }
   // $flow-disable-line
+  //如果回调函数不存在并且当前环境支持Promise时，则声明一个Promise 函数
   if (!cb && typeof Promise !== 'undefined') {
     return new Promise(resolve => {
       _resolve = resolve

@@ -4,24 +4,44 @@ export const emptyObject = Object.freeze({})
 
 // These helpers produce better VM code in JS engines due to their
 // explicitness and function inlining.
+/**
+ * 判断数据是否为 undefined或null
+ * @param {数据} v 
+ */
 export function isUndef (v: any): boolean %checks {
   return v === undefined || v === null
 }
 
+/**
+ * 判断数据是否不为 undefined或null
+ * @param {数据} v 
+ */
 export function isDef (v: any): boolean %checks {
   return v !== undefined && v !== null
 }
 
+/**
+ * 判断数据是否为 true
+ * @param {数据} v 
+ */
 export function isTrue (v: any): boolean %checks {
   return v === true
 }
 
+/**
+ * 判断数据是否为 false
+ * @param {数据} v 
+ */
 export function isFalse (v: any): boolean %checks {
   return v === false
 }
 
 /**
  * Check if value is primitive.
+ */
+/**
+ * 判断数据类型是否是基本数据类型(string，number，symbol，boolean)
+ * @param {数据} value 
  */
 export function isPrimitive (value: any): boolean %checks {
   return (
@@ -103,15 +123,24 @@ export function toNumber (val: string): number | string {
  * Make a map and return a function for checking if a key
  * is in that map.
  */
+/**
+ * 根据str, 生成一个map, 然后返回一个方法, 这个方法的作用是, 判断一个值是否在这个生成的map中
+ * @param {用来生成map的字符串, 用','隔开，例如 'type,tag,attrsList,attrsMap,plain'} str 
+ * @param {是否转小写} expectsLowerCase 
+ */
 export function makeMap (
   str: string,
   expectsLowerCase?: boolean
 ): (key: string) => true | void {
+  // 创建一个空对象
   const map = Object.create(null)
+  // 通过 `,` 将字符串分割成数组，例如：[type,tag,attrsList,attrsMap,plain]
   const list: Array<string> = str.split(',')
+  // 通过for循环将数组中的每一项作为对象的健，`true`作为值，给对象添加相应的属性
   for (let i = 0; i < list.length; i++) {
     map[list[i]] = true
   }
+  // 返回一个检查传递进来的参数是否在此对象中的函数
   return expectsLowerCase
     ? val => map[val.toLowerCase()]
     : val => map[val]
@@ -119,6 +148,9 @@ export function makeMap (
 
 /**
  * Check if a tag is a built-in tag.
+ */
+/**
+ * 判断是内置的标签，内置的标签有slot和componen
  */
 export const isBuiltInTag = makeMap('slot,component', true)
 
@@ -130,10 +162,16 @@ export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is')
 /**
  * Remove an item from an array.
  */
+/**
+ * 删除数组中的指定选项
+ * @param {数组} arr 
+ * @param {要删除的选项} item 
+ */
 export function remove (arr: Array<any>, item: any): Array<any> | void {
   if (arr.length) {
+    // 获取要删除选项在数组中的索引
     const index = arr.indexOf(item)
-    if (index > -1) {
+    if (index > -1) { // 如果指定选项在数组中
       return arr.splice(index, 1)
     }
   }
@@ -150,11 +188,18 @@ export function hasOwn (obj: Object | Array<*>, key: string): boolean {
 /**
  * Create a cached version of a pure function.
  */
+/**
+ * 缓存运行fn的运行结果
+ * @param {*} fn 
+ */
 export function cached<F: Function> (fn: F): F {
+  // 创建一个空对象
   const cache = Object.create(null)
-  return (function cachedFn (str: string) {
-    const hit = cache[str]
-    return hit || (cache[str] = fn(str))
+  return (function cachedFn (str: string) {  
+    // 获取缓存对象str属性的值
+    const hit = cache[str] 
+    // 如果该值存在，直接返回，不存在调用一次fn，然后将结果存放到缓存对象中
+    return hit || (cache[str] = fn(str)) 
   }: any)
 }
 
@@ -175,6 +220,7 @@ export const capitalize = cached((str: string): string => {
 
 /**
  * Hyphenate a camelCase string.
+ * 用连接符 - 替换驼峰命名
  */
 const hyphenateRE = /\B([A-Z])/g
 export const hyphenate = cached((str: string): string => {
@@ -190,6 +236,13 @@ export const hyphenate = cached((str: string): string => {
  */
 
 /* istanbul ignore next */
+/**
+ * 当Function的原型上不存在bind()函数时，
+ * 自定义一个函数实现同样的功能，
+ * 用apply()或call()来实现
+ * @param {mehtods属性值} fn 
+ * @param {执行上下文，例如Vue实例} ctx 
+ */
 function polyfillBind (fn: Function, ctx: Object): Function {
   function boundFn (a) {
     const l = arguments.length
@@ -204,10 +257,16 @@ function polyfillBind (fn: Function, ctx: Object): Function {
   return boundFn
 }
 
+/**
+ * 
+ * @param {mehtods属性值} fn 
+ * @param {执行上下文，例如Vue实例} ctx 
+ */
 function nativeBind (fn: Function, ctx: Object): Function {
   return fn.bind(ctx)
 }
 
+// 判断当前环境是否支持bind方法
 export const bind = Function.prototype.bind
   ? nativeBind
   : polyfillBind

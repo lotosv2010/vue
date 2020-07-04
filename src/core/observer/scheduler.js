@@ -117,8 +117,8 @@ function flushSchedulerQueue () {
   resetSchedulerState()
 
   // call component updated and activated hooks
-  callActivatedHooks(activatedQueue)
-  callUpdatedHooks(updatedQueue)
+  callActivatedHooks(activatedQueue) // 执行activated钩子函数
+  callUpdatedHooks(updatedQueue) // 执行updated钩子函数
 
   // devtool hook
   /* istanbul ignore if */
@@ -127,12 +127,17 @@ function flushSchedulerQueue () {
   }
 }
 
+/**
+ * 执行updated钩子函数
+ * @param {watcher队列} queue 
+ */
 function callUpdatedHooks (queue) {
   let i = queue.length
   while (i--) {
     const watcher = queue[i]
     const vm = watcher.vm
     if (vm._watcher === watcher && vm._isMounted && !vm._isDestroyed) {
+      // TODO:(生命周期:updated)
       callHook(vm, 'updated')
     }
   }
@@ -149,6 +154,10 @@ export function queueActivatedComponent (vm: Component) {
   activatedChildren.push(vm)
 }
 
+/**
+ * 执行activated钩子函数
+ * @param {watcher队列} queue 
+ */
 function callActivatedHooks (queue) {
   for (let i = 0; i < queue.length; i++) {
     queue[i]._inactive = true
@@ -161,11 +170,20 @@ function callActivatedHooks (queue) {
  * Jobs with duplicate IDs will be skipped unless it's
  * pushed when the queue is being flushed.
  */
+/**
+ * 将观察者放到一个队列中等待所有突变完成之后统一执行更新
+ * @param {观察者实例} watcher 
+ */
 export function queueWatcher (watcher: Watcher) {
+  // 获取观察者对象的唯一 id
   const id = watcher.id
+  // 避免将相同的观察者重复入队
   if (has[id] == null) {
+    // 将该观察者的 id 值登记到 has 对象上作为 has 对象的属性同时将该属性值设置为 true
     has[id] = true
+    // 判断是否执行更新，flushing 为 true 表示正在更新
     if (!flushing) {
+      // 入队
       queue.push(watcher)
     } else {
       // if already flushing, splice the watcher based on its id
@@ -181,9 +199,11 @@ export function queueWatcher (watcher: Watcher) {
       waiting = true
 
       if (process.env.NODE_ENV !== 'production' && !config.async) {
+        // flushSchedulerQueue 函数的作用之一就是用来将队列中的观察者统一执行更新的
         flushSchedulerQueue()
         return
       }
+      // 调用nextTick
       nextTick(flushSchedulerQueue)
     }
   }

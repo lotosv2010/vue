@@ -16,24 +16,33 @@ export default class Dep {
   subs: Array<Watcher>;
 
   constructor () {
+    // dep对象的id
     this.id = uid++
+    // 数组，用来存储依赖响应式属性的Observer
     this.subs = []
   }
 
+  // 将Observer添加到dep对象的依赖列表中
   addSub (sub: Watcher) {
+    // Dep对象实例添加订阅它的Watcher
     this.subs.push(sub)
   }
 
+  // 将Observer从dep对象的依赖列表中删除
   removeSub (sub: Watcher) {
+    // Dep对象实例移除订阅它的Watcher
     remove(this.subs, sub)
   }
 
+  // 收集依赖关系
   depend () {
+    // 把当前Dep对象实例添加到当前正在计算的Watcher的依赖中
     if (Dep.target) {
       Dep.target.addDep(this)
     }
   }
 
+  // 通知Observer更新
   notify () {
     // stabilize the subscriber list first
     const subs = this.subs.slice()
@@ -43,6 +52,7 @@ export default class Dep {
       // order
       subs.sort((a, b) => a.id - b.id)
     }
+    // 遍历所有的订阅Watcher，然后调用他们的update方法
     for (let i = 0, l = subs.length; i < l; i++) {
       subs[i].update()
     }

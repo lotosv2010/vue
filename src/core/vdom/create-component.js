@@ -109,15 +109,23 @@ export function createComponent (
     return
   }
 
+  // 获得基础构造器baseCtor
+  // 这里的context是指向vm实例
+  // 在'globalp-api/index.js'中，可以看到option._base指向的是Vue
+  // 而在'core/instance/init.js'中，已经将全局的options与vm实例的options合并，这样baseCtor指向的就是Vue
   const baseCtor = context.$options._base
 
   // plain options object: turn it into a constructor
   if (isObject(Ctor)) {
+    // 对组件的构造器Ctor进行扩展，实际上执行的是Vue.extend。
+    // extend函数在'core/gloabal-api/extend.js'中定义
+    // extend函数主要的功能是返回一个组件构造器（函数），拥有Vue相同的功能。
     Ctor = baseCtor.extend(Ctor)
   }
 
   // if at this stage it's not a constructor or an async component factory,
   // reject.
+  // 判断是不是函数，不是的话则抛出警告
   if (typeof Ctor !== 'function') {
     if (process.env.NODE_ENV !== 'production') {
       warn(`Invalid Component definition: ${String(Ctor)}`, context)
@@ -183,9 +191,13 @@ export function createComponent (
   }
 
   // install component management hooks onto the placeholder node
+  // 处理组件的钩子函数
   installComponentHooks(data)
 
   // return a placeholder vnode
+  // 注意：
+  // 这个vnode中的children定义的是undefined，
+  // 而在最后一个参数componentOptions中，传入了children，最后返回vnode
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
@@ -224,7 +236,11 @@ export function createComponentInstanceForVnode (
 }
 
 function installComponentHooks (data: VNodeData) {
+  // 获取到data中的hook
   const hooks = data.hook || (data.hook = {})
+  // 循环hooksToMerge进行判断，如果data中存在该hook，则合并
+  // 不存在则直接添加到data中
+  // hooksToMerge定义为componentVNodeHooks的keys
   for (let i = 0; i < hooksToMerge.length; i++) {
     const key = hooksToMerge[i]
     const existing = hooks[key]

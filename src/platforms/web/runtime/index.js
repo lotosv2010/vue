@@ -31,12 +31,14 @@ extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
 // install platform patch function
+// 初始化path方法
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
+// 原型上声明的 $mount方法在,这个方法会被runtime only版本和runtime compiler版本中复用
 Vue.prototype.$mount = function (
-  el?: string | Element,
-  hydrating?: boolean
+  el?: string | Element, // 真实的dom 或者 是string
+  hydrating?: boolean // 新的虚拟dom vnode
 ): Component {
   el = el && inBrowser ? query(el) : undefined
   return mountComponent(this, el, hydrating)

@@ -43,43 +43,50 @@ export default class Watcher {
   value: any;
 
   constructor (
-    vm: Component,
-    expOrFn: string | Function,
-    cb: Function,
-    options?: ?Object,
-    isRenderWatcher?: boolean
+    vm: Component, // vm dom
+    expOrFn: string | Function, // 获取值的函数，或者是更新viwe试图函数
+    cb: Function, // 回调函数,回调值给回调函数
+    options?: ?Object, // 参数
+    isRenderWatcher?: boolean // 是否渲染过得观察者
   ) {
     this.vm = vm
+    // 是否是已经渲染过得观察者
     if (isRenderWatcher) {
+      // 把当前 Watcher 对象赋值给 vm._watcher上
       vm._watcher = this
     }
+    // 把观察者添加到队列里面 当前Watcher添加到vue实例上
     vm._watchers.push(this)
     // options
+    // 如果有参数
     if (options) {
-      this.deep = !!options.deep
-      this.user = !!options.user
-      this.lazy = !!options.lazy
-      this.sync = !!options.sync
-      this.before = options.before
+      this.deep = !!options.deep // 用来告诉当前观察者实例对象是否是深度观测
+      this.user = !!options.user // 用来标识当前观察者实例对象是 开发者定义的 还是 内部定义的
+      this.lazy = !!options.lazy // 懒惰渲染，用来标识当前观察者实例对象是否是计算属性的观察者
+      this.sync = !!options.sync // 用来告诉观察者当数据变化时是否同步求值并执行回调
+      this.before = options.before // 可以理解为 Watcher 实例的钩子，当数据变化之后，触发更新之前，调用在创建渲染函数的观察者实例对象时传递的 `before` 选项
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }
-    this.cb = cb
-    this.id = ++uid // uid for batching
-    this.active = true
-    this.dirty = this.lazy // for lazy watchers
-    this.deps = []
-    this.newDeps = []
+    this.cb = cb // 回调函数
+    this.id = ++uid // uid for batching // uid为批处理  监听者id
+    this.active = true // 激活
+    this.dirty = this.lazy // for lazy watchers // 对于懒惰的观察者
+    this.deps = [] // 观察者队列
+    this.newDeps = [] // 新的观察者队列
+    // 内容不可重复的数组对象
     this.depIds = new Set()
     this.newDepIds = new Set()
+    // 把函数变成字符串形式
     this.expression = process.env.NODE_ENV !== 'production'
       ? expOrFn.toString()
       : ''
     // parse expression for getter
+    // getter的解析表达式
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
-      this.getter = parsePath(expOrFn)
+      this.getter = parsePath(expOrFn) // get对应的是parsePath()返回的匿名函数
       if (!this.getter) {
         this.getter = noop
         process.env.NODE_ENV !== 'production' && warn(
@@ -92,17 +99,19 @@ export default class Watcher {
     }
     this.value = this.lazy
       ? undefined
-      : this.get()
+      : this.get() // 最后会执行get()方法
   }
 
   /**
    * Evaluate the getter, and re-collect dependencies.
    */
   get () {
+    // 将当前用户watch保存到Dep.target中
     pushTarget(this)
     let value
     const vm = this.vm
     try {
+      // 执行用户wathcer的getter()方法，此方法会将当前用户watcher作为订阅者订阅起来
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {
@@ -114,9 +123,12 @@ export default class Watcher {
       // "touch" every property so they are all tracked as
       // dependencies for deep watching
       if (this.deep) {
+        // 深度收集 value 中的key
         traverse(value)
       }
+      // 恢复之前的watcher
       popTarget()
+      // 清理依赖项集合
       this.cleanupDeps()
     }
     return value
@@ -126,11 +138,12 @@ export default class Watcher {
    * Add a dependency to this directive.
    */
   addDep (dep: Dep) {
-    const id = dep.id
-    if (!this.newDepIds.has(id)) {
-      this.newDepIds.add(id)
-      this.newDeps.push(dep)
-      if (!this.depIds.has(id)) {
+    const id = dep.id // dep.id 一个持续相加的id
+    if (!this.newDepIds.has(id)) { // 如果id不存在
+      this.newDepIds.add(id) // 添加一个id
+      this.newDeps.push(dep) // 添加一个deps
+      if (!this.depIds.has(id)) { // 如果depIds不存在id则添加一个sub
+        // 添加一个sub
         dep.addSub(this)
       }
     }
@@ -144,13 +157,14 @@ export default class Watcher {
     while (i--) {
       const dep = this.deps[i]
       if (!this.newDepIds.has(dep.id)) {
-        dep.removeSub(this)
+        dep.removeSub(this) //清除 sub
       }
     }
-    let tmp = this.depIds
-    this.depIds = this.newDepIds
-    this.newDepIds = tmp
-    this.newDepIds.clear()
+    let tmp = this.depIds // 获取depids
+    this.depIds = this.newDepIds // 获取新的depids
+    this.newDepIds = tmp // 旧的覆盖新的
+    this.newDepIds.clear() //清空对象
+    // 互换值
     tmp = this.deps
     this.deps = this.newDeps
     this.newDeps = tmp
@@ -166,8 +180,11 @@ export default class Watcher {
     if (this.lazy) {
       this.dirty = true
     } else if (this.sync) {
+      // 如果$this.sync为true，则直接运行this.run获取结果，
+      // 这里对应watch的值为对象且含有sync属性的情况
       this.run()
     } else {
+      // 否则调用queueWatcher()函数把所有要执行update()的watch push到队列中
       queueWatcher(this)
     }
   }
@@ -178,20 +195,22 @@ export default class Watcher {
    */
   run () {
     if (this.active) {
-      const value = this.get()
+      const value = this.get() // 获取新值
       if (
-        value !== this.value ||
+        value !== this.value || // 新值和旧值不相等
         // Deep watchers and watchers on Object/Arrays should fire even
         // when the value is the same, because the value may
         // have mutated.
-        isObject(value) ||
-        this.deep
+        isObject(value) || // 新值是对象
+        this.deep // deep为true
       ) {
         // set new value
         const oldValue = this.value
         this.value = value
-        if (this.user) {
+        if (this.user) { // 如果是个用户 watcher
           try {
+            // 执行这个回调函数 vm作为上下文 参数1为新值 参数2为旧值，
+            // 也就是最后我们自己定义的function(newval,val){ console.log(newval,val) }函数
             this.cb.call(this.vm, value, oldValue)
           } catch (e) {
             handleError(e, this.vm, `callback for watcher "${this.expression}"`)
@@ -207,8 +226,13 @@ export default class Watcher {
    * Evaluate the value of the watcher.
    * This only gets called for lazy watchers.
    */
+  /**
+   * 为计算watcher量身定制的
+   */
   evaluate () {
+    // 调用计算属性的get方法，此时如果有依赖其他属性，则会在其他属性的dep对象里将当前计算watcher作为订阅者
     this.value = this.get()
+    // 修正this.dirty为false,即一个渲染watcher渲染多个计算属性时，只会执行一次
     this.dirty = false
   }
 
@@ -216,8 +240,10 @@ export default class Watcher {
    * Depend on all deps collected by this watcher.
    */
   depend () {
+    // 获取计算watcher的所有deps
     let i = this.deps.length
     while (i--) {
+      // 为该deps增加渲染watcher
       this.deps[i].depend()
     }
   }

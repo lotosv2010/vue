@@ -18,6 +18,9 @@ export const isPhantomJS = UA && /phantomjs/.test(UA)
 export const isFF = UA && UA.match(/firefox\/(\d+)/)
 
 // Firefox has a "watch" function on Object.prototype...
+// 在 Firefox 中原生提供了 Object.prototype.watch 函数，
+// 所以当运行在 Firefox 中时 nativeWatch 为原生提供的函数，
+// 在其他浏览器中 nativeWatch 为 undefined。这个变量主要用于 Vue 处理 watch 选项时与其冲突
 export const nativeWatch = ({}).watch
 
 export let supportsPassive = false
