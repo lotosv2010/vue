@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>深入响应式原理-响应式对象</title>
+  <script src="../../dist/vue.js"></script>
+</head>
+<body>
+  <div id="app"></div>
+    <script>
+      // Vue.config.optionMergeStrategies.data = function (parent, child, vm) {
+      //   console.log(parent, child, vm)
+      //   return { name: 'tom' }
+      // 
+      const child = {
+        template: `
+          <div v-on:click="getName"> {{ name }} </div>
+        `,
+        data() {
+          return { name: 'robin' }
+        },
+        methods: {
+          getName() {}
+        }
+      }
+    //   Vue.config.devtools = true
+    //   Vue.config.performance = true
+      new Vue({
+        el: '#app',
+        // props: ['name'],
+        // components: {child},
+        // template: `<child/>`,
+        // template: `
+        //   <div v-attrs="{ color: 'red', text: 'hello!' }"> {{ name }} </div>
+        // `,
+        template: `<div> {{ name }} </div>`,
+        // directives: {
+        //   attrs: function (el, binding) {
+        //     console.log(binding.value.color) // => "white"
+        //     console.log(binding.value.text)  // => "hello!"
+        //     el.style.backgroundColor = binding.value.color
+        //   }
+        // },
+        data: {
+          name: 'robin',
+          children: {
+            name: 'child'
+          }
+        },
+        // watch: {
+        //   'children.name': function(newVal, old) {
+        //     console.log(newVal, old)
+        //   }
+        // },
+        // methods: {
+        //   name() {}
+        // }
+      })
+    </script>
+</body>
+</html>
+

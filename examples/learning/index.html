@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>new Vue.js</title>
+    <script src="../../dist/vue.js"></script>
+    <style>
+      .active {
+        background-color: brown;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" :class="{active: isActive}">
+      {{ fullName }}
+      <test ref="child"></test>
+      <button @click="changeMsg" ref="changeMsg">测试(更新操作)</button>
+      <button @click="destroy" ref="changeMsg">测试(销毁操作)</button>
+      <button @click="show">show</button>
+    </div>
+    <script>
+      Vue.component('child',{
+        inject:['message'],
+        template:'<p>{{message}}</p>'
+      })
+
+      Vue.component('test',{
+        template:`<div class="test"><child></child></div>`
+      })
+
+      Vue.directive('demo', function (el, binding) {
+        console.log(binding.value.color) // => "white"
+        console.log(binding.value.text)  // => "hello!"
+      })
+
+      var vm = new Vue({
+        el: '#app',
+        // template: `<div id="app" @click="msg='hello world'">{{ fullName }}</div>`,
+        data: {
+          msg: 'hello vue',
+          isActive: false
+        },
+        props: {
+          height: Number
+        },
+        watch: {
+          msg(val, old) {
+            this.isActive = true
+            console.log(val, old)
+          }
+        },
+        computed: {
+          fullName() {
+            return this.msg + ' !'
+          }
+        },
+        provide: {
+          message:'Hello Provide!'
+        },
+        beforeCreate() { console.log('beforeCreate'); },
+        created() { console.log('created'); },
+        beforeMount() { console.log('beforeMount'); },  
+        mounted() { console.log('mounted'); },
+        beforeUpdate() { console.log('beforeUpdate'); },
+        updated() { console.log('updated'); },
+        beforeDestroy() { console.log('beforeDestroy'); },
+        destroyed() { console.log('destroyed'); },
+        methods: {
+          changeMsg() {
+            this.msg='hello world'
+          },
+          destroy() {
+            this.$destroy()
+          },
+          show() {
+            console.log(this.$refs)
+          }
+        }
+      })
+    </script>
+
+  </body>
+</html>

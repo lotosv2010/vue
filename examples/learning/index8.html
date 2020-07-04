@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>深入响应式原理-响应式对象</title>
+  <script src="../../dist/vue.js"></script>
+  <style>
+    /* link，visited,hover,active */
+    a {
+      color: #000;
+    }
+    a:link {
+      color: black;
+    }
+    a:visited {
+      color: crimson;
+    }
+    a:hover {
+      color: blueviolet;
+    }
+    a:active {
+      color: coral;
+    }
+  </style>
+</head>
+<body>
+  <!-- ddddd -->
+  <div id="app"></div>
+    <script>
+      const child = {
+        template: `
+        <ul>
+          <li v-for="(todo, i) in todos" :key="i">
+            <slot name="todo" :todo="todo"></slot>
+          </li>
+        </ul>
+        `,
+        data() {
+          return {
+            todos: [
+              { name: 'list1', id: 1 },
+              { name: 'list2', id: 2 },
+              { name: 'list3', id: 3 }
+            ]
+          }
+        }
+      }
+
+      new Vue({
+        el: '#app',
+        template: `
+          <ul :class="classObject" class="list" v-if="isShow">
+            <li v-for="(l, i) in list" :key="i" ref="i" @click="clickItem(index)">{{ i }}:{{ l }}</li>
+          </ul>
+        `,
+        // template: `
+        //   <div id="div1" :class="classObject" class="list" v-bind:prop-data="prop1" prop2="prop2" v-show="isShow"  @click.once="clickItem(index)"> {{ val }} </div>
+        // `,
+        // template: `
+        // <div v-if="isShow">1111</div>
+        // <header v-else-if="!isShow"></header>
+        // <p v-else>2222</p>
+        // `,
+        components: {
+          child
+        },
+        data: {
+          name: 'robin',
+          isShow: true,
+          list: ['Vue', 'React', 'Angular'],
+          val: 'test',
+          inputType: 'text',
+          classObject: {
+            active: true,
+            'text-danger': false
+          },
+          child: 3,
+          slotObj: {
+            name: 'slot test'
+          },
+          isTrue: false,
+          prop1: {name: 'prop1'}
+        },
+        comments: true,
+        methods: {
+          clickItem(index) {
+            console.log(index)
+          }
+        }
+      })
+    </script>
+</body>
+</html>
