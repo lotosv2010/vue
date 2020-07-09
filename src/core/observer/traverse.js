@@ -37,6 +37,7 @@ function _traverse (val: any, seen: SimpleSet) {
     return
   }
   // val存在__ob__属性，即val是响应式数据
+  // 避免循环引用造成的死循环的解决方案
   if (val.__ob__) {
     const depId = val.__ob__.dep.id
     if (seen.has(depId)) {
