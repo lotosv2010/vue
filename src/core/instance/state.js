@@ -96,7 +96,7 @@ export function initState (vm: Component) {
  * @param {props属性对象} propsOptions 
  */
 function initProps (vm: Component, propsOptions: Object) {
-  // todo：propsData是什么？
+  // propsData 用来存储来自外界的组件数据的
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
